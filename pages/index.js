@@ -1,36 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 
-export default function Home() {
-  const [games, setGames] = useState([]);
+const Home = ({ games }) => {
   const [searchItem, setSearchItem] = useState("");
-  const [sortedByPlatform, setSortedByPlatform] = useState(
-    false
-  );
+  const [sortedByPlatform, setSortedByPlatform] = useState(false);
+  const [filteredGames, setFilteredGames] = useState(games);
 
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const response = await axios.get(
-          "https://s3-ap-southeast-1.amazonaws.com/he-public-data/gamesarena274f2bf.json"
-        );
-        setGames(response.data);
-      } catch (error) {
-        console.error("Error fetching games:", error);
-      }
-    };
-
-    fetchGames();
-  }, []);
-
-  const handleSearchChange = (
-    event
-  ) => {
-    setSearchItem(event.target.value);
+  const handleSearchChange = (event) => {
+    const search = event.target.value.toLowerCase();
+    setSearchItem(search);
+    const filtered = games.filter(
+      (game) => game.title && game.title.toLowerCase().includes(search)
+    );
+    setFilteredGames(filtered);
   };
 
   const handleSortByPlatform = () => {
-    const sortedGames = [...games].sort((a, b) => {
+    const sortedGames = [...filteredGames].sort((a, b) => {
       if (!a.platform || !b.platform) return 0;
       if (sortedByPlatform) {
         return b.platform.localeCompare(a.platform);
@@ -38,56 +24,184 @@ export default function Home() {
         return a.platform.localeCompare(b.platform);
       }
     });
-    setGames(sortedGames);
+    setFilteredGames(sortedGames);
     setSortedByPlatform(!sortedByPlatform);
   };
 
-  const filteredGames = games.filter(
-    (game) =>
-      game &&
-      game.title &&
-      game.title.toLowerCase().includes(searchItem.toLowerCase())
-  );
+  const resetItems = () => {
+    setFilteredGames(games);
+    setSearchItem("");
+    setSortedByPlatform(false);
+  };
 
   return (
-    <div className="p-8">
-      <h2 className="text-3xl text-center text-lime-400 mb-4">Games Arena</h2>
+    <div style={{ padding: "20px" }}>
+      <div>
+        <h2>
+          <center>
+            <span
+              style={{
+                fontSize: "30px",
+                textAlign: "center",
+                color: "yellowgreen",
+                marginBottom: "1%",
+                border: "1px solid grey",
+                padding: "7px",
+              }}
+            >
+              Unity Games
+            </span>
+          </center>
+        </h2>
+      </div>
+
       <input
         type="text"
         placeholder="Search by title"
         value={searchItem}
         onChange={handleSearchChange}
-        className="w-full h-12 border-2 border-lime-300 rounded mb-4 px-4 bg-transparent text-white"
+        style={{
+          color: "white",
+          width: "100%",
+          height: "40px",
+          border: "2px solid yellowgreen",
+          borderRadius: "5px",
+          marginBottom: "20px",
+          padding: "0 10px",
+          background: "transparent",
+        }}
       />
       <button
         onClick={handleSortByPlatform}
-        className="px-4 py-2 bg-lime-300 text-black rounded mb-4"
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "yellowgreen",
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          marginBottom: "20px",
+        }}
       >
         Sort by Platform {sortedByPlatform ? "(Z-A)" : "(A-Z)"}
       </button>
-      <table className="w-full border-2 border-lime-300">
+      <button
+        onClick={resetItems}
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "yellow",
+          color: "black",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          marginBottom: "20px",
+          marginLeft: "10px",
+        }}
+      >
+        Reset
+      </button>
+      <table
+        style={{
+          width: "100%",
+          border: "2px solid yellowgreen",
+          margin: "2px",
+        }}
+      >
         <thead>
           <tr>
-            <th className="border border-lime-300 p-4 text-lg"><u>Title</u></th>
-            <th className="border border-lime-300 p-4 text-lg"><u>Platform</u></th>
-            <th className="border border-lime-300 p-4 text-lg"><u>Score</u></th>
-            <th className="border border-lime-300 p-4 text-lg"><u>Genre</u></th>
-            <th className="border border-lime-300 p-4 text-lg"><u>Editors Choice</u></th>
+            <th
+              style={{
+                border: "1px solid white",
+                padding: "10px",
+                fontSize: "20px",
+              }}
+            >
+              <u>Title</u>
+            </th>
+            <th
+              style={{
+                border: "1px solid white",
+                padding: "10px",
+                fontSize: "20px",
+              }}
+            >
+              <u>Platform</u>
+            </th>
+            <th
+              style={{
+                border: "1px solid white",
+                padding: "10px",
+                fontSize: "20px",
+              }}
+            >
+              <u>Score</u>
+            </th>
+            <th
+              style={{
+                border: "1px solid white",
+                padding: "10px",
+                fontSize: "20px",
+              }}
+            >
+              <u>Genre</u>
+            </th>
+            <th
+              style={{
+                border: "1px solid white",
+                padding: "10px",
+                fontSize: "20px",
+              }}
+            >
+              <u>Editor's Choice</u>
+            </th>
           </tr>
         </thead>
         <tbody>
-          {filteredGames.map((game, index) => (
-            <tr key={index}>
-              <td className="border border-lime-300 p-4">{game.title}</td>
-              <td className="border border-lime-300 p-4">{game.platform}</td>
-              <td className="border border-lime-300 p-4">{game.score}</td>
-              <td className="border border-lime-300 p-4">{game.genre}</td>
-              <td className="border border-lime-300 p-4">{game.editors_choice === "Y" ? "Yes" : "No"}</td>
-            </tr>
-          ))}
+          {filteredGames.map(
+            (game, index) =>
+              game.title && (
+                <tr key={index}>
+                  <td style={{ border: "1px solid white", padding: "10px" }}>
+                    {game.title}
+                  </td>
+                  <td style={{ border: "1px solid white", padding: "10px" }}>
+                    {game.platform}
+                  </td>
+                  <td style={{ border: "1px solid white", padding: "10px" }}>
+                    <center>{game.score}</center>
+                  </td>
+                  <td style={{ border: "1px solid white", padding: "10px" }}>
+                    <center>{game.genre}</center>
+                  </td>
+                  <td style={{ border: "1px solid white", padding: "10px" }}>
+                    <center>
+                      {game.editors_choice === "Y" ? "Yes" : "No"}
+                    </center>
+                  </td>
+                </tr>
+              )
+          )}
         </tbody>
       </table>
     </div>
   );
 };
 
+export async function getServerSideProps() {
+  try {
+    const response = await axios.get(
+      "https://s3-ap-southeast-1.amazonaws.com/he-public-data/gamesarena274f2bf.json"
+    );
+    const games = response.data;
+    return {
+      props: { games },
+    };
+  } catch (error) {
+    console.error("Error fetching games:", error);
+    return {
+      props: { games: [] },
+    };
+  }
+}
+
+export default Home;

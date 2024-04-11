@@ -6,8 +6,8 @@ const Home = ({ games }) => {
   const [sortedByPlatform, setSortedByPlatform] = useState(false);
   const [filteredGames, setFilteredGames] = useState(games);
 
-  const handleSearchChange = (event) => {
-    const search = event.target.value.toLowerCase();
+  const handleSearch = (event) => {
+    const search = event.target.value.trim().toLowerCase();
     setSearchItem(search);
     const filtered = games.filter(
       (game) => game.title && game.title.toLowerCase().includes(search)
@@ -15,7 +15,7 @@ const Home = ({ games }) => {
     setFilteredGames(filtered);
   };
 
-  const handleSortByPlatform = () => {
+  const handleSort = () => {
     const sortedGames = [...filteredGames].sort((a, b) => {
       if (!a.platform || !b.platform) return 0;
       if (sortedByPlatform) {
@@ -28,7 +28,7 @@ const Home = ({ games }) => {
     setSortedByPlatform(!sortedByPlatform);
   };
 
-  const resetItems = () => {
+  const resetGames = () => {
     setFilteredGames(games);
     setSearchItem("");
     setSortedByPlatform(false);
@@ -59,7 +59,7 @@ const Home = ({ games }) => {
         type="text"
         placeholder="Search by title"
         value={searchItem}
-        onChange={handleSearchChange}
+        onChange={handleSearch}
         style={{
           color: "white",
           width: "100%",
@@ -72,7 +72,7 @@ const Home = ({ games }) => {
         }}
       />
       <button
-        onClick={handleSortByPlatform}
+        onClick={handleSort}
         style={{
           padding: "10px 20px",
           backgroundColor: "yellowgreen",
@@ -86,7 +86,7 @@ const Home = ({ games }) => {
         Sort by Platform {sortedByPlatform ? "(Z-A)" : "(A-Z)"}
       </button>
       <button
-        onClick={resetItems}
+        onClick={resetGames}
         style={{
           padding: "10px 20px",
           backgroundColor: "yellow",
